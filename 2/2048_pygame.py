@@ -29,7 +29,7 @@ class block:
 class gameManager:
 
     block_Mat = []
-    num_Mat = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,16]]
+    num_Mat = [[0,0,0,0],[0,0,16,0],[0,0,0,0],[0,0,0,0]]
 
     def __init__(self):
         pygame.init()
@@ -39,7 +39,7 @@ class gameManager:
         for i in range(0,4):
             newLine = []
             for j in range(0,4):
-                newLine.append(block(dot(i+1,j+1,self.screen)))
+                newLine.append(block(dot(j+1,i+1,self.screen)))
 
             self.block_Mat.append(newLine)
         self.font =     pygame.font.Font(None, 36)
@@ -168,29 +168,31 @@ class gameManager:
 
         # 找出最大数
         max_number = max(up_max, down_max, left_max, right_max)
-        # 检查每个方向移动后最大的数是否在四角，如果有，则记录该方向
-        corners = []
-        if self.is_corner(up_max_position):
-            corners.append(('up', up_matrix))
-        if self.is_corner(down_max_position):
-            corners.append(('down', down_matrix))
-        if self.is_corner(left_max_position):
-            corners.append(('left', left_matrix))
-        if self.is_corner(right_max_position):
-            corners.append(('right', right_matrix))
-        print(corners)
-        # 如果四个角都存在最大数，则从中选择移动后存在最少0的方向
-        if corners:
-            min_zeros = float('inf')
-            min_zeros_direction = None
-            for direction, matrix in corners:
-                num_zeros = sum(row.count(0) for row in matrix)
-                if num_zeros < min_zeros:
-                    min_zeros = num_zeros
-                    min_zeros_direction = direction
-            return min_zeros_direction
+        print(max_number)
 
-        # 如果四角不存在最大数，则检查每个方向移动后存在最少0的方向，并返回该方向
+        # 如果最大数在角落，则优先选择该方向
+        if self.is_corner(up_max_position):
+            return 'up'
+        elif self.is_corner(down_max_position):
+            return 'down'
+        elif self.is_corner(left_max_position):
+            return 'left'
+        elif self.is_corner(right_max_position):
+            return 'right'
+
+        # 找出四个角落中最大数最大的方向
+        corner_max = max(up_max, down_max, left_max, right_max)
+        max_direction = None
+        if corner_max == up_max:
+            max_direction = 'up'
+        elif corner_max == down_max:
+            max_direction = 'down'
+        elif corner_max == left_max:
+            max_direction = 'left'
+        elif corner_max == right_max:
+            max_direction = 'right'
+
+        # 检查每个方向移动后存在最少0的方向，并返回该方向
         min_zeros = float('inf')
         min_zeros_direction = None
         for direction, matrix in [('up', up_matrix), ('down', down_matrix), ('left', left_matrix),
@@ -200,7 +202,11 @@ class gameManager:
                 min_zeros = num_zeros
                 min_zeros_direction = direction
 
-        return min_zeros_direction
+        # 如果有多个方向的最大数都在角落中，则选择其中最大最大数和最少0的方向
+        if max_direction:
+            return max_direction
+        else:
+            return min_zeros_direction
 
     def get_max_number(self, matrix):
         max_number = 0
@@ -233,19 +239,19 @@ if __name__ == '__main__':
 
             # 检查按键事件
             elif event.type == pygame.KEYDOWN:
-                print(game.predict_next_move())
                 if event.key == pygame.K_UP:
-                    game.move_left(game.num_Mat)
-                    game.random_generate()
-                elif event.key == pygame.K_DOWN:
-                    game.move_right(game.num_Mat)
-                    game.random_generate()
-                elif event.key == pygame.K_LEFT:
                     game.move_up(game.num_Mat)
                     game.random_generate()
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_DOWN:
                     game.move_down(game.num_Mat)
                     game.random_generate()
+                elif event.key == pygame.K_LEFT:
+                    game.move_left(game.num_Mat)
+                    game.random_generate()
+                elif event.key == pygame.K_RIGHT:
+                    game.move_right(game.num_Mat)
+                    game.random_generate()
+                print(game.predict_next_move())
         game.update()
     """while True:
         for event in pygame.event.get():
