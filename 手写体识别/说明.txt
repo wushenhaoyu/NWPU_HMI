@@ -1,0 +1,29 @@
+test1采用scikit-learn库实现手写体分类
+test2采用pytorch库实现手写体分类
+
+运行test1需要安装开发库
+1. 安装anaconda
+2. 进入anaconda命令行，安装python环境，安装开发库。这里pysk是环境名，在vscode或pycharm中配置使用。 
+conda create -n pysk python=3.8
+conda install scikit-learn matplotlib pandas
+
+运行test2需要安装开发库
+conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cpuonly -c pytorch
+这里是老版本的pytorch库，如果电脑有gpu希望安装新的库，参考https://pytorch.org/
+
+
+详解MNIST数据集
+https://blog.csdn.net/KRISNAT/article/details/130670596
+
+
+其它学习网站
+
+https://pythongeeks.org/python-projects/
+https://python-course.eu/python-tutorial/
+https://scikit-learn.org/stable/user_guide.html
+https://scikit-learn.org.cn/
+
+https://pytorch123.com/
+https://pytorch.org/tutorials/beginner/basics/intro.html
+https://pytorch-cn.readthedocs.io/zh/latest/
+https://ptorch.com/docs/3/deep_learning_60min_blitz
