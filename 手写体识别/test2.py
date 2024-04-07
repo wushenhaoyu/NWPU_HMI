@@ -75,10 +75,10 @@ criterion = nn.CrossEntropyLoss() #使用交叉熵损失函数
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9) #使用SGD梯度下降
 
 use_gpu = torch.cuda.is_available()
-print()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+net = net.to(device)
 if use_gpu:
     net.cuda() #是否启用GPU加速
-    print(torch.cuda.is_available())
 
 for epoch in range(2):
 
@@ -129,12 +129,13 @@ print('Finished Training')
 correct = 0
 total = 0
 for data in testLoader:
-    images, labels = data
+    images, labels = data[0].to(device), data[1].to(device)
     outputs = net(Variable(images))
     _, predicted = torch.max(outputs.data, 1)
     total += labels.size(0)
-    correct += (predicted == labels).sum()
-print('Accuracy of the network on  test images: %d %%' % (
+    correct += (predicted == labels).sum().item() # use .item() to get the number from the device
+
+print('Accuracy of the network on test images: %d %%' % (
     100 * correct / total))
 
 #Accuracy of the network on  test images: 98 %

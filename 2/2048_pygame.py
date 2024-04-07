@@ -29,7 +29,7 @@ class block:
 class gameManager:
 
     block_Mat = []
-    num_Mat = [[0,0,0,0],[0,0,16,0],[0,0,0,0],[0,0,0,0]]
+    num_Mat = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 
     def __init__(self):
         pygame.init()
