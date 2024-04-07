@@ -188,25 +188,25 @@ test_labels = load_mnist_labels('t10k-labels-idx1-ubyte.gz')
 
 
 ###### ANN 分类器
-import pandas as pd
-import seaborn as sn
-from sklearn import metrics
-from sklearn.neural_network import MLPClassifier 
-clf = MLPClassifier(hidden_layer_sizes=(100,),
-                    activation='logistic', solver='adam',
-                    learning_rate_init = 0.0001, max_iter=2000)
-
-print(clf)
-clf.fit(train_data[3000:4000,:],train_labels[3000:4000])
-test_predictions = clf.predict(test_data)
-
-
-
-cm=metrics.confusion_matrix(test_labels,test_predictions)
-df_cm = pd.DataFrame(cm, range(10), range(10))
-plt.figure()
-sn.set(font_scale=1.2)#for label size
-sn.heatmap(df_cm, annot=True,annot_kws={"size": 16}, fmt="g") #, cmap='viridis')# font size
-plt.show()
-t_accuracy = sum(test_predictions == test_labels) / float(len(test_labels))
-print(t_accuracy)
+# import pandas as pd
+# import seaborn as sn
+# from sklearn import metrics
+# from sklearn.neural_network import MLPClassifier
+# clf = MLPClassifier(hidden_layer_sizes=(100,),
+#                     activation='logistic', solver='adam',
+#                     learning_rate_init = 0.0001, max_iter=2000)
+#
+# print(clf)
+# clf.fit(train_data[3000:4000,:],train_labels[3000:4000])
+# test_predictions = clf.predict(test_data)
+#
+#
+#
+# cm=metrics.confusion_matrix(test_labels,test_predictions)
+# df_cm = pd.DataFrame(cm, range(10), range(10))
+# plt.figure()
+# sn.set(font_scale=1.2)#for label size
+# sn.heatmap(df_cm, annot=True,annot_kws={"size": 16}, fmt="g") #, cmap='viridis')# font size
+# plt.show()
+# t_accuracy = sum(test_predictions == test_labels) / float(len(test_labels))
+# print(t_accuracy)

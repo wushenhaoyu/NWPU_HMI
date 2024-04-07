@@ -42,7 +42,10 @@ class gameManager:
                 newLine.append(block(dot(j+1,i+1,self.screen)))
 
             self.block_Mat.append(newLine)
-        self.font =     pygame.font.Font(None, 36)
+        self.font = pygame.font.Font(None, 36)
+        self.text1 = self.font.render("提示", True, (187,173,160))
+        self.rect1 = self.text1.get_rect(topleft=(10,10))
+        self.screen.blit(self.text1,self.rect1)
     def update(self):
         for i in range(0,4):
             for j in range(0,4):
@@ -166,47 +169,48 @@ class gameManager:
         left_max_position = self.get_max_position(left_matrix)
         right_max_position = self.get_max_position(right_matrix)
 
-        # 找出最大数
-        max_number = max(up_max, down_max, left_max, right_max)
-        print(max_number)
-
-        # 如果最大数在角落，则优先选择该方向
+        # 第一次筛选：找出最大数在角落的方向
+        corners = []
         if self.is_corner(up_max_position):
-            return 'up'
-        elif self.is_corner(down_max_position):
-            return 'down'
-        elif self.is_corner(left_max_position):
-            return 'left'
-        elif self.is_corner(right_max_position):
-            return 'right'
+            corners.append(('up', up_max, up_matrix))
+        if self.is_corner(down_max_position):
+            corners.append(('down', down_max, down_matrix))
+        if self.is_corner(left_max_position):
+            corners.append(('left', left_max, left_matrix))
+        if self.is_corner(right_max_position):
+            corners.append(('right', right_max, right_matrix))
 
-        # 找出四个角落中最大数最大的方向
-        corner_max = max(up_max, down_max, left_max, right_max)
-        max_direction = None
-        if corner_max == up_max:
-            max_direction = 'up'
-        elif corner_max == down_max:
-            max_direction = 'down'
-        elif corner_max == left_max:
-            max_direction = 'left'
-        elif corner_max == right_max:
-            max_direction = 'right'
+        if not corners:
+            return self.find_max_zeros_direction(up_matrix, down_matrix, left_matrix,
+                                                 right_matrix)  # 如果没有最大数在角落，返回含0最多的方向
 
-        # 检查每个方向移动后存在最少0的方向，并返回该方向
-        min_zeros = float('inf')
-        min_zeros_direction = None
-        for direction, matrix in [('up', up_matrix), ('down', down_matrix), ('left', left_matrix),
-                                  ('right', right_matrix)]:
+        # 第二次筛选：在第一次筛选的基础上找出最大数在角落的最大的方向
+        max_corner = max(corners, key=lambda x: x[1])
+        max_directions = [corner for corner in corners if corner[1] == max_corner[1]]
+
+        if len(max_directions) == 1:
+            return max_directions[0][0]  # 如果只有一个方向，直接返回该方向
+
+        # 第三次筛选：在第二次筛选的基础上，找出矩阵中0数量最多的方向
+        max_zeros = float('-inf')
+        max_zeros_direction = None
+        for direction, _, matrix in max_directions:
             num_zeros = sum(row.count(0) for row in matrix)
-            if num_zeros < min_zeros:
-                min_zeros = num_zeros
-                min_zeros_direction = direction
+            if num_zeros > max_zeros:
+                max_zeros = num_zeros
+                max_zeros_direction = direction
 
-        # 如果有多个方向的最大数都在角落中，则选择其中最大最大数和最少0的方向
-        if max_direction:
-            return max_direction
-        else:
-            return min_zeros_direction
+        return max_zeros_direction  # 返回第三次筛选出的方向
+
+    def find_max_zeros_direction(self, *matrices):
+        max_zeros = float('-inf')
+        max_zeros_direction = None
+        for direction, matrix in zip(['up', 'down', 'left', 'right'], matrices):
+            num_zeros = sum(row.count(0) for row in matrix)
+            if num_zeros > max_zeros:
+                max_zeros = num_zeros
+                max_zeros_direction = direction
+        return max_zeros_direction
 
     def get_max_number(self, matrix):
         max_number = 0
@@ -227,44 +231,49 @@ class gameManager:
             return True
         else:
             return False
-red = (255,0,0)
+
+
+red = (255, 0, 0)
+
+red = (255, 0, 0)
+
+red = (255, 0, 0)
+
 if __name__ == '__main__':
     game = gameManager()
     done = False
+    last_move_direction = None  # 存储上一次移动的方向
     while not done:
         # 处理事件
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
 
-            # 检查按键事件
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     game.move_up(game.num_Mat)
                     game.random_generate()
+                    last_move_direction = 'up'  # 更新上一次移动的方向
                 elif event.key == pygame.K_DOWN:
                     game.move_down(game.num_Mat)
                     game.random_generate()
+                    last_move_direction = 'down'  # 更新上一次移动的方向
                 elif event.key == pygame.K_LEFT:
                     game.move_left(game.num_Mat)
                     game.random_generate()
+                    last_move_direction = 'left'  # 更新上一次移动的方向
                 elif event.key == pygame.K_RIGHT:
                     game.move_right(game.num_Mat)
                     game.random_generate()
-                print(game.predict_next_move())
+                    last_move_direction = 'right'  # 更新上一次移动的方向
+
+        # 清除上一次的文字
+        game.screen.fill((250,248,239), (0, 40, 100, 40))
+
+        # 显示新的提示文字
+        if last_move_direction:
+            text_surface = game.font.render(game.predict_next_move(), True, (187, 173, 160))
+            text_rect = text_surface.get_rect(center=(40, 60))
+            game.screen.blit(text_surface, text_rect)
+
         game.update()
-    """while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                    # 检测上下左右键是否被按下
-                    if event.key == pygame.K_UP:
-                        move_up()
-                    elif event.key == pygame.K_DOWN:
-                        move_down()
-                    elif event.key == pygame.K_LEFT:
-                        move_left()
-                    elif event.key == pygame.K_RIGHT:
-                        move_right()"""
