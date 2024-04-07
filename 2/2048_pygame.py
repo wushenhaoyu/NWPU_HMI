@@ -1,31 +1,11 @@
 import copy
 import random
-import sys
-from core_2048 import init,move_up,move_down,move_left,move_right
+import numpy as np
 import pygame
+from module import dot, block, grid
 
 bg = (205,193,180)
-class dot:
-    x = 0
-    y = 0
-    def __init__(self,x,y,screen):
-        self.x = x
-        self.y = y
-        self.screen = screen
-class block:
-    x = 0
-    y = 0
-    position = dot(0,0,screen=None)
-    def __init__(self,position):
-        self.position = position
-        self.x = 100 + (self.position.x - 1) * 70
-        self.y = 100 + (self.position.y - 1) * 70
-    def update(self,txtsurf):
-        pygame.draw.rect(self.position.screen, bg, pygame.Rect(self.x, self.y, 60, 60))
-        if txtsurf is not None:
-            text_x = self.x + (60 - txtsurf.get_width()) // 2
-            text_y = self.y + (60 - txtsurf.get_height()) // 2
-            self.position.screen.blit(txtsurf, (text_x, text_y))
+
 class gameManager:
 
     block_Mat = []
@@ -43,7 +23,7 @@ class gameManager:
 
             self.block_Mat.append(newLine)
         self.font = pygame.font.Font(None, 36)
-        self.text1 = self.font.render("提示", True, (187,173,160))
+        self.text1 = self.font.render("advice", True, (187,173,160))
         self.rect1 = self.text1.get_rect(topleft=(10,10))
         self.screen.blit(self.text1,self.rect1)
     def update(self):
@@ -151,6 +131,22 @@ class gameManager:
                     num_Mat[j - 1][i] = 0
         return num_Mat
 
+    def move(self,direction,mat):#上下左右
+        if direction == 0:
+            return self.move_up(mat)
+        elif direction == 1:
+            return self.move_down(mat)
+        elif direction == 2:
+            return self.move_left(mat)
+        elif direction == 3:
+            return self.move_right(mat)
+
+    def compareMat(self,a,b):
+        a = np.array(a)
+        b = np.array(b)
+        return np.array_equal(a, b)
+
+
     # 添加预测下一步移动方向的方法
     def predict_next_move(self):
         # 计算向上、向下、向左、向右移动后的矩阵，并记录每个方向的最大数和最大数位置
@@ -233,6 +229,18 @@ class gameManager:
             return False
 
 
+    def search(self,grid,depth,alpha,beta,positions,cutoffs):
+        bestMove = -1
+        for direction in range(4):
+            newMat = copy.deepcopy(self.num_Mat)
+            self.move(direction,newMat)
+
+
+
+
+
+
+
 red = (255, 0, 0)
 
 red = (255, 0, 0)
@@ -244,7 +252,6 @@ if __name__ == '__main__':
     done = False
     last_move_direction = None  # 存储上一次移动的方向
     while not done:
-        # 处理事件
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
@@ -266,14 +273,18 @@ if __name__ == '__main__':
                     game.move_right(game.num_Mat)
                     game.random_generate()
                     last_move_direction = 'right'  # 更新上一次移动的方向
+                game.screen.fill((250, 248, 239), (0, 40, 100, 40))
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Get mouse position
+                position = pygame.mouse.get_pos()
 
-        # 清除上一次的文字
-        game.screen.fill((250,248,239), (0, 40, 100, 40))
+                # Check if mouse position is on the "advice" text
+                if game.rect1.collidepoint(position):
+                    if last_move_direction:
+                        print("提示：", game.predict_next_move())
+                        text_surface = game.font.render(game.predict_next_move(), True, (187, 173, 160))
+                        text_rect = text_surface.get_rect(center=(40, 60))
+                        game.screen.blit(text_surface, text_rect)
 
-        # 显示新的提示文字
-        if last_move_direction:
-            text_surface = game.font.render(game.predict_next_move(), True, (187, 173, 160))
-            text_rect = text_surface.get_rect(center=(40, 60))
-            game.screen.blit(text_surface, text_rect)
 
         game.update()
