@@ -3,6 +3,7 @@ import copy
 import random
 
 class mat:
+    playerTurn = True
     def __init__(self, game_matrix):
         self.game_matrix = game_matrix
         self.size = game_matrix.shape[0]
@@ -13,6 +14,7 @@ class mat:
         new_size = self.size
         new_obj = mat(new_game_matrix)
         new_obj.size = new_size
+        new_obj.playerTurn = self.playerTurn
         return new_obj
 
     def __deepcopy__(self, memo):
@@ -21,6 +23,7 @@ class mat:
         new_size = self.size
         new_obj = mat(new_game_matrix)
         new_obj.size = new_size
+        new_obj.playerTurn = self.playerTurn
         return new_obj
 
     def monotonicity(self):
@@ -94,6 +97,7 @@ class mat:
         return new_game_matrix
 
     def move(self,direction):
+        self.playerTurn = False
         if direction == 0 :
             return self.move_up()
         elif direction == 1:
@@ -169,6 +173,61 @@ class mat:
                 if self.game_matrix[i][j] == 2048:
                     return True
         return False
+
+    def islands(self):
+        def mark(x, y, value):
+            nonlocal islands
+            if 0 <= x < 4 and 0 <= y < 4 and \
+               self.game_matrix[x][y] == value and \
+               not marked[x][y]:
+                marked[x][y] = True
+                for direction in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                    dx, dy = direction
+                    mark(x + dx, y + dy, value)
+
+        islands = 0
+        marked = [[False for _ in range(4)] for _ in range(4)]
+
+        for x in range(4):
+            for y in range(4):
+                marked[x][y] = False
+
+        for x in range(4):
+            for y in range(4):
+                if self.game_matrix[x][y] != 0 and not marked[x][y]:
+                    islands += 1
+                    mark(x, y, self.game_matrix[x][y])
+
+        return islands
+
+    def get_available_cells(self):
+        cells = []
+        for x in range(self.size):
+            for y in range(self.size):
+                if self.game_matrix[x][y] == 0:
+                    cells.append((x, y))
+        return cells
+
+    def cells_available(self):
+        # 检查是否还有空单元格可用
+        return np.any(self.game_matrix == 0)
+
+    def random_available_cell(self):
+        # 随机选择一个空单元格的位置
+        empty_cells = np.argwhere(self.game_matrix == 0)
+        random_index = np.random.randint(0, empty_cells.shape[0])
+        return tuple(empty_cells[random_index])
+
+    def add_random_tile(self):
+        if self.cells_available():
+            value = 2 if np.random.random() < 0.9 else 4
+            cell_position = self.random_available_cell()
+            self.game_matrix[cell_position] = value
+
+    def computer_move(self):
+        # 计算机移动的操作
+        self.add_random_tile()
+        self.playerTurn = True
 
 
 

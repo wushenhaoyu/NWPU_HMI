@@ -1,3 +1,6 @@
+
+
+
 class AI:
     def __init__(self, mat):
         self.mat = mat
@@ -6,7 +9,7 @@ class AI:
         best_score = float('inf')
         best_move = None  # 改为None以提高可读性
         result = {}
-        if depth:  # 更明确的条件，替代if 1:
+        if self.mat.playerTurn:  # 更明确的条件，替代if 1:
             for direction in range(4):
                 try:
                     new_mat = self.mat.move(direction)
@@ -51,12 +54,11 @@ class AI:
                 for cell in available_cells:
                     self.mat.insert(cell, value)
                     # 计算加入新值后的分数
-###--------------------------------------写到这里了--------------------------------------------------------###
                     scores[value].append(-self.mat.smoothness() + self.mat.islands())
-                    self.mat.remove_tile(cell)
+                    self.mat.remove(cell)
 
             # 寻找最高分数
-            max_score = max(max(scores[2]), max(scores[4]))
+            max_score = custom_max((custom_max(scores[2]), custom_max(scores[4] ) ))
 
             # 使得添加2或4得分最高的空格成为候选空格
             for value in scores.keys():
@@ -68,18 +70,26 @@ class AI:
             for i in range(len(candidates)):
                 position, value = candidates[i]
                 new_mat = copy.deepcopy(self.mat)
-                new_mat.insert_tile(position, value)
+                new_mat.insert(position, value)
+                new_mat.playerTurn = False
+                positions += 1
                 new_ai = AI(new_mat)
-                result = new_ai.search(depth, alpha, best_score)
 
-                if result < best_score:
-                    best_score = result
-                    best_move = (position, value)  # 保存得分最低的操作至best_move
+
+                result = new_ai.search(depth, alpha, best_score,positions,cutoffs)
+                positions = result['positions']
+                cutoffs = result['cutoffs']
+
+                if result['score'] < best_score:
+                    best_score = result['score']
+                    #best_move = (position, value)  # 保存得分最低的操作至best_move
 
                 if best_score < alpha:
-                    return best_move, alpha
+                    cutoffs += 1
+                    return {'move':null , 'score':alpha ,'positions':positions,'cutoffs': cutoffs}
 
-            return best_move, best_score  # 返回最佳操作以及对应的分数
+
+            return {'move':best_move,'score':best_score,'positions':positions,'cutoffs': cutoffs}
 
 
     def getBest(self):
@@ -87,10 +97,40 @@ class AI:
 
     # 在这里寻找最好的移动的代码
 
-    def iterativeDeep(self):
-        pass
+    def iterative_deep(self, min_search_time):
+        start = time.time()
+        depth = 0
+        best = None
+        while True:
+            new_best = self.search(depth, float('-inf'), float('inf'), 0, 0)
+            if new_best['move'] == -1:
+                break
+            else:
+                best = new_best
+            depth += 1
+            if time.time() - start >= min_search_time:
+                break
+        return best
 
 
 
-    def translate(self, move):
-        pass
+    def getBest(self, move):
+        return self.iterativeDeep();
+
+    def custom_max(scores):
+        max_score = None
+
+        for score_list in scores.values():
+            if not score_list:
+                raise InvalidScoreListException(f"Score list at index {next(iter(scores))} is empty.")
+
+            try:
+                score_list_max = max(score_list)
+            except TypeError as e:
+                raise InvalidScoreListException(
+                    f"Score list at index {next(iter(scores))} contains non-comparable elements.") from e
+
+            if max_score is None or score_list_max > max_score:
+                max_score = score_list_max
+
+        return max_score
