@@ -3,6 +3,7 @@ import pygame
 import random
 import math
 from ai import  AI
+from functional import mat
 pygame.init()
 
 FPS = 60
@@ -75,6 +76,8 @@ class Game2048:
         pygame.display.set_caption("2048")
         self.tiles = {}  # Initialize tiles dictionary
         self.generate_tiles()
+        self.ai = AI(mat(self.matrix_to_np()))
+        self.ai_active = False
 
     def draw_grid(self):
         for row in range(1, self.ROWS):
@@ -238,7 +241,6 @@ class Game2048:
         return matrix
 
     def main(self):
-        self.ai = AI(self.matrix_to_np())
         run = True
 
         while run:
@@ -248,22 +250,34 @@ class Game2048:
                     break
 
                 if event.type == pygame.KEYDOWN:
+                    if self.ai_active:
+                        # 如果AI处于活动状态，则忽略键盘输入
+                        continue
+
                     if event.key == pygame.K_LEFT:
                         self.move_tiles("left")
-                    if event.key == pygame.K_RIGHT:
+                    elif event.key == pygame.K_RIGHT:
                         self.move_tiles("right")
-                    if event.key == pygame.K_UP:
+                    elif event.key == pygame.K_UP:
                         self.move_tiles("up")
-                    if event.key == pygame.K_DOWN:
+                    elif event.key == pygame.K_DOWN:
                         self.move_tiles("down")
 
                 # Handle mouse clicks
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
+
                     if pygame.Rect(800, 0, 250, 150).collidepoint(mouse_pos):
                         print(self.matrix_to_np())
+
                     if pygame.Rect(800, 300, 250, 150).collidepoint(mouse_pos):
-                        print("Button 'AI' clicked!")
+                        self.ai_active = not self.ai_active  # 切换AI活动状态
+                        print("AI" + (" activated" if self.ai_active else " deactivated"))
+
+            if self.ai_active:
+                # AI自动操作：根据当前游戏状态，获取AI的最佳移动方向
+                best_move = self.ai.getBest()  # 假设您的AI类有一个getBestMove方法返回最佳移动方向
+                self.move_tiles(best_move)
 
             self.draw()
 

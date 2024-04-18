@@ -93,8 +93,6 @@ class AI:
             return {'move':best_move,'score':best_score,'positions':positions,'cutoffs': cutoffs}
 
 
-    def getBest(self):
-        pass
 
     # 在这里寻找最好的移动的代码
 
@@ -115,8 +113,8 @@ class AI:
 
 
 
-    def getBest(self, move):
-        return self.iterativeDeep();
+    def getBest(self):
+        return self.iterative_deep(1)
 
     def custom_max(scores):
         max_score = None
