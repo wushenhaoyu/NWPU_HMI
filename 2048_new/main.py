@@ -2,7 +2,7 @@ import numpy as np
 import pygame
 import random
 import math
-
+from ai import  AI
 pygame.init()
 
 FPS = 60
@@ -238,6 +238,7 @@ class Game2048:
         return matrix
 
     def main(self):
+        self.ai = AI(self.matrix_to_np())
         run = True
 
         while run:

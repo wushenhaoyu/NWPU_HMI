@@ -1,8 +1,11 @@
 import copy
 import random
+
 import numpy as np
 import pygame
-from module import dot, block, grid
+
+from module import dot, block
+
 
 bg = (205,193,180)
 

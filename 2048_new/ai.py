@@ -1,4 +1,5 @@
-
+import copy
+import time
 
 
 class AI:
@@ -23,7 +24,7 @@ class AI:
                         return {'move': direction, 'score': 10000, 'positions': positions, 'cutoffs': cutoffs}
 
                     new_ai = AI(new_mat)
-                    if depth == 1:  # 假设原意图是针对最后一层深度使用不同的策略
+                    if depth == 0:  # 假设原意图是针对最后一层深度使用不同的策略
                         result = {'move': direction, 'score': new_ai.mat.evaluation()}
                     else:
                         result = new_ai.search(depth - 1, alpha, beta, positions, cutoffs)
@@ -58,7 +59,7 @@ class AI:
                     self.mat.remove(cell)
 
             # 寻找最高分数
-            max_score = custom_max((custom_max(scores[2]), custom_max(scores[4] ) ))
+            max_score = self.custom_max((self.custom_max(scores[2]), self.custom_max(scores[4])))
 
             # 使得添加2或4得分最高的空格成为候选空格
             for value in scores.keys():
@@ -69,7 +70,7 @@ class AI:
             # 对每个候选空格进行评估
             for i in range(len(candidates)):
                 position, value = candidates[i]
-                new_mat = copy.deepcopy(self.mat)
+                new_mat = self.mat.__deepcopy__()
                 new_mat.insert(position, value)
                 new_mat.playerTurn = False
                 positions += 1
@@ -86,7 +87,7 @@ class AI:
 
                 if best_score < alpha:
                     cutoffs += 1
-                    return {'move':null , 'score':alpha ,'positions':positions,'cutoffs': cutoffs}
+                    return {'move':None , 'score':alpha ,'positions':positions,'cutoffs': cutoffs}
 
 
             return {'move':best_move,'score':best_score,'positions':positions,'cutoffs': cutoffs}
@@ -120,15 +121,16 @@ class AI:
     def custom_max(scores):
         max_score = None
 
-        for score_list in scores.values():
+        for index, score_list in scores.items():
             if not score_list:
-                raise InvalidScoreListException(f"Score list at index {next(iter(scores))} is empty.")
+                print(f"Warning: Score list at index {index} is empty. Skipping.")
+                continue
 
             try:
                 score_list_max = max(score_list)
             except TypeError as e:
-                raise InvalidScoreListException(
-                    f"Score list at index {next(iter(scores))} contains non-comparable elements.") from e
+                print(f"Warning: Score list at index {index} contains non-comparable elements. Skipping.")
+                continue
 
             if max_score is None or score_list_max > max_score:
                 max_score = score_list_max
