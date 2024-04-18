@@ -46,7 +46,6 @@ class AI:
                         cutoffs += 1
                         return {'move': self.best_move, 'score': beta, 'positions': positions, 'cutoffs': cutoffs}
 
-            return {'move': self.best_move, 'score': self.best_score, 'positions': positions, 'cutoffs': cutoffs}
         else:
             self.best_score = beta
             candidates = []
@@ -80,12 +79,11 @@ class AI:
 
                 if self.result['score'] < self.best_score:
                     self.best_score = self.result['score']
-                    self.best_move = self.result['move']
                 if self.best_score < alpha:
                     cutoffs += 1
                     return {'move': None, 'score': alpha, 'positions': positions, 'cutoffs': cutoffs}
 
-            return {'move': self.best_move, 'score': self.best_score, 'positions': positions, 'cutoffs': cutoffs}
+        return {'move': self.best_move, 'score': self.best_score, 'positions': positions, 'cutoffs': cutoffs}
 
     # 在这里寻找最好的移动的代码
 
@@ -96,12 +94,12 @@ class AI:
         while True:
             new_best = self.search(self.depth, float('-inf'), float('inf'), 0, 0)
             print(new_best,self.depth)
-            self.depth += 1  # 深度增加的部分移动到循环外
-            if new_best['move'] == -1 or self.depth >= max_depth:
+            if new_best['move'] == -1:
                 break
             else:
                 self.best = new_best
             print(time.time() - self.start)
+            self.depth += 1
             if time.time() - self.start >= min_search_time:
                 print('结束')
                 break

@@ -283,9 +283,12 @@ class Game2048:
 
             if self.ai_active:
                 # AI自动操作：根据当前游戏状态，获取AI的最佳移动方向
+                self.ai = AI(mat(self.matrix_to_np()))
                 best_move = self.ai.getBest()
                 # 假设您的AI类有一个getBestMove方法返回最佳移动方向
                 print('移动方向:',best_move['move'])
+                if best_move['move'] == -1:
+                    print('?')
                 self.move_tiles(self.direction_to_english(best_move['move']))
 
             self.draw()
