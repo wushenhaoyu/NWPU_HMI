@@ -107,12 +107,12 @@ class mat:
         elif direction == 3:
             return self.move_right()
 
-    def compare(self,a):
+    def compare(self,a): #判断是否不相同
         for i in range(4):
             for j in range(4):
                 if self.game_matrix[i][j] != a.game_matrix[i][j]:
-                    return False
-        return True
+                    return True
+        return False
 
 
     def _collapse_row(self, row):
@@ -164,7 +164,7 @@ class mat:
     def insert(self,dot,value):
         self.game_matrix[dot[0]][dot[1]] = value
 
-    def remove(self,dot,value):
+    def remove(self,dot):
         self.game_matrix[dot[0]][dot[1]] = 0
 
     def isWin(self):

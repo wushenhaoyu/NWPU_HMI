@@ -240,6 +240,13 @@ class Game2048:
             matrix[row][col] = tile.value
         return matrix
 
+    def direction_to_english(self,direction):
+        directions = ['up', 'down', 'left', 'right']
+        if 0 <= direction <= 3:
+            return directions[direction]
+        else:
+            return None  # 或者抛出异常
+
     def main(self):
         run = True
 
@@ -276,8 +283,10 @@ class Game2048:
 
             if self.ai_active:
                 # AI自动操作：根据当前游戏状态，获取AI的最佳移动方向
-                best_move = self.ai.getBest()  # 假设您的AI类有一个getBestMove方法返回最佳移动方向
-                self.move_tiles(best_move)
+                best_move = self.ai.getBest()
+                # 假设您的AI类有一个getBestMove方法返回最佳移动方向
+                print('移动方向:',best_move['move'])
+                self.move_tiles(self.direction_to_english(best_move['move']))
 
             self.draw()
 
