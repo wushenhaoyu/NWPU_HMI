@@ -199,7 +199,8 @@ class Game2048:
             return "lost"
 
         row, col = self.get_random_pos()
-        self.tiles[f"{row}{col}"] = Tile(random.choice([2, 4]), row, col, self.RECT_WIDTH, self.RECT_HEIGHT)
+        # 修改这里，只生成值为2的新Tile
+        self.tiles[f"{row}{col}"] = Tile(2, row, col, self.RECT_WIDTH, self.RECT_HEIGHT)
         return "continue"
 
     def update_tiles(self, sorted_tiles):

@@ -7,8 +7,6 @@ class AI:
     def __init__(self, mat):
         self.mat = mat
 
-
-
     def search(self, depth, alpha, beta, positions=0, cutoffs=0):
         self.best_score = None
         self.best_move = -1
@@ -34,8 +32,6 @@ class AI:
                         self.result = {'move': direction, 'score': new_ai.mat.evaluation()}
                     else:
                         self.result = new_ai.search(depth - 1, self.best_score, beta, positions, cutoffs)
-                        if self.result['score'] > 9900:
-                            self.result['score'] -= 1
                         positions = self.result['positions']
                         cutoffs = self.result['cutoffs']
 
@@ -50,7 +46,7 @@ class AI:
             self.best_score = beta
             candidates = []
             available_cells = self.mat.get_available_cells()
-            scores = {2: [], 4: []}
+            scores = {2: []}
 
             for value in scores.keys():
                 for cell in available_cells:
@@ -58,12 +54,11 @@ class AI:
                     scores[value].append(-self.mat.smoothness() + self.mat.islands())
                     self.mat.remove(cell)
 
-            max_score = self.custom_max((self.custom_max(scores[2]), self.custom_max(scores[4])))
+            max_score = self.custom_max(scores[2])
 
-            for value in scores.keys():
-                for i in range(len(scores[value])):
-                    if scores[value][i] == max_score:
-                        candidates.append((available_cells[i], value))
+            for i in range(len(scores[2])):
+                if scores[2][i] == max_score:
+                    candidates.append((available_cells[i], 2))
 
             for i in range(len(candidates)):
                 position, value = candidates[i]
