@@ -16,10 +16,10 @@ class AI:
             self.best_score = alpha
             for direction in range(4):
                 try:
-                    new_mat = mat(self.mat.move(direction))
+                    new_mat = mat(self.mat.move(direction),self.mat.smooth_weight,self.mat.mono_weight,self.mat.empty_weight,self.mat.max_weight)
                     new_mat.playerTurn = False
                 except Exception as e:
-                    print(f"移动时发生错误: {e}")
+                    #print(f"移动时发生错误: {e}")
                     continue
 
                 if self.mat.compare(new_mat):
@@ -88,15 +88,15 @@ class AI:
         self.best = None
         while True:
             new_best = self.search(self.depth, float('-inf'), float('inf'), 0, 0)
-            print(new_best,self.depth)
+           # print(new_best,self.depth)
             if new_best['move'] == -1:
                 break
             else:
                 self.best = new_best
-            print(time.time() - self.start)
+            #print(time.time() - self.start)
             self.depth += 1
             if time.time() - self.start >= min_search_time:
-                print('结束')
+                #print('结束')
                 break
         return self.best
 
@@ -105,12 +105,12 @@ class AI:
 
     def custom_max(self, scores):
         if not scores:
-            print("Warning: The score list is empty.")
+           # print("Warning: The score list is empty.")
             return None
 
         valid_scores = [score for score in scores if score is not None]
         if not valid_scores:
-            print("Warning: All scores are None.")
+           # print("Warning: All scores are None.")
             return None
 
         max_score = max(valid_scores)

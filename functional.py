@@ -4,9 +4,13 @@ import random
 
 class mat:
     playerTurn = True
-    def __init__(self, game_matrix):
+    def __init__(self, game_matrix, smooth_weight, mono_weight, empty_weight, max_weight):
         self.game_matrix = game_matrix
         self.size = game_matrix.shape[0]
+        self.smooth_weight = smooth_weight
+        self.mono_weight = mono_weight
+        self.empty_weight = empty_weight
+        self.max_weight = max_weight
 
     def __copy__(self):
         # 创建一个新的对象，并使用浅复制来复制属性
@@ -21,7 +25,7 @@ class mat:
         # 创建一个新的对象，并使用深复制来复制属性
         new_game_matrix = copy.deepcopy(self.game_matrix, memo)
         new_size = self.size
-        new_obj = mat(new_game_matrix)
+        new_obj = mat(new_game_matrix, self.smooth_weight, self.mono_weight, self.empty_weight, self.max_weight)
         new_obj.size = new_size
         new_obj.playerTurn = self.playerTurn
         return new_obj
@@ -137,18 +141,20 @@ class mat:
             random_index = random.choice(empty_indices)
             self.game_matrix[random_index[0]][random_index[1]] = 2 if random.random() < 0.9 else 4
 
+    def set_parameters(self, smooth_weight, mono_weight, empty_weight, max_weight):
+        self.smooth_weight = smooth_weight
+        self.mono_weight = mono_weight
+        self.empty_weight = empty_weight
+        self.max_weight = max_weight
+
     def evaluation(self):
         empty_cells = np.sum(self.game_matrix == 0)
 
-        smooth_weight = 0.1
-        mono_weight = 1.0
-        empty_weight = 2.7
-        max_weight = 1.0
 
-        smoothness_score = self.smoothness() * smooth_weight
-        mono2_score = self.monotonicity() * mono_weight
-        empty_score = np.log(empty_cells) * empty_weight
-        max_score = np.max(self.game_matrix) * max_weight
+        smoothness_score = self.smoothness() * self.smooth_weight
+        mono2_score = self.monotonicity() * self.mono_weight
+        empty_score = np.log(empty_cells) * self.empty_weight
+        max_score = np.max(self.game_matrix) * self.max_weight
 
         total_score = smoothness_score + mono2_score + empty_score + max_score
         return total_score
