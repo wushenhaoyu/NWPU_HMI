@@ -9,8 +9,8 @@ import librosa.display
 import matplotlib.pyplot as plt
 
 
-audio_path = 'train/'
-sample_path = 'train/029_1_1.wav'
+audio_path = '无人机指令/'
+sample_path = '无人机指令/029_1_1.wav'
 
 
 # 绘制样本音频波形图，声谱图，梅尔声谱图,梅尔系数图
@@ -75,10 +75,9 @@ def draw_figures():
 
 
 students_num = ["029", "033", "039", "045", "049", "068", "914", "918", "919", "934", "970"]
-#orders_num = ["起飞", "降落", "前进", "后退", "升高"]
-orders_num = ["Takeoff", "Landing", "Advance", "Retreat", "Rise"]
+#orders_num = ["Takeoff", "Landing", "Advance", "Retreat", "Rise"]
 #orders_num = ["起飞-1", "降落-2", "前进-3", "后退-4", "升高-5"]
-#orders_num = ["Takeoff-1", "Landing-2", "Advance-3", "Retreat-4", "Rise-5"]
+orders_num = ["Takeoff-1", "Landing-2", "Advance-3", "Retreat-4", "Rise-5"]
 repeat_num = ['1', '2', '3', '4']
 number_of_mfcc_features = 13
 
@@ -92,7 +91,8 @@ def mfcc_extraction(path, students_num, orders_num, repeat_num):
     for stu_num in students_num:
         for index, order in enumerate(orders_num):
             for repeat in repeat_num:
-                file_path = path + stu_num + '_' + str(index+1) + '_' + repeat + ".wav"
+                #file_path = path + stu_num + '_' + str(index+1) + '_' + repeat + ".wav"
+                file_path = path + stu_num + '_' + order[-1] + '_' + repeat + ".wav"
                 if os.path.exists(file_path):
                     x, sr = librosa.load(file_path)
                     x = librosa.effects.preemphasis(x)  # 预加重处理
@@ -102,7 +102,7 @@ def mfcc_extraction(path, students_num, orders_num, repeat_num):
                     mean_features.append(mean_mfccs)
                     std_features.append(std_mfccs)
 
-                    labels.append(order)
+                    labels.append(order[:-2])
                 else:
                     pass
     return mean_features, std_features, labels
@@ -110,6 +110,8 @@ def mfcc_extraction(path, students_num, orders_num, repeat_num):
 
 mfcc_features_and_labels = mfcc_extraction(audio_path, students_num, orders_num, repeat_num)
 mean_mfcc_features, std_mfcc_features, mfcc_labels = mfcc_features_and_labels
+
+
 # MFCC特征整合
 mfcc_features = numpy.concatenate((mean_mfcc_features, std_mfcc_features,), axis=1)
 #print(mfcc_features.shape)
@@ -202,6 +204,9 @@ print(f"GridSearch accuracy:{accuracy_score(y_test, y_pred):.10f}")
 
 # 混淆矩阵
 confmat = confusion_matrix(y_true=y_test, y_pred=y_pred)
+#print(confmat)
+
+confmatrix_labels = [ "Advance", "Landing", "Retreat", "Rise", "Takeoff"]
 
 fig, ax = plt.subplots(figsize=(6, 5))
 plt.gcf().subplots_adjust(left=0.25,right=0.95,bottom=0.19,top=0.8) #设置图像边界
@@ -216,8 +221,8 @@ for i in range(confmat.shape[0]):
 plt.title('Confusion Matrix with labels')
 plt.xlabel('Predicted label')
 plt.ylabel('True label')
-plt.xticks(ticks=np.arange(len(orders_num)),labels=orders_num,horizontalalignment='center')
-plt.yticks(ticks=np.arange(len(orders_num)),labels=orders_num,verticalalignment='center')
+plt.xticks(ticks=np.arange(len(confmatrix_labels)),labels=confmatrix_labels,horizontalalignment='center')
+plt.yticks(ticks=np.arange(len(confmatrix_labels)),labels=confmatrix_labels,verticalalignment='center')
 plt.tick_params(axis='both',which='minor',color='blue',pad=5,labelsize=4,direction='out')
 plt.colorbar(pad=0.09,orientation='vertical',extend='both',shrink=0.8,location='right')
 
