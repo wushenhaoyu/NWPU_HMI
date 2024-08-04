@@ -9,8 +9,8 @@ import librosa.display
 import matplotlib.pyplot as plt
 
 
-audio_path = '无人机指令/'
-sample_path = '无人机指令/029_1_1.wav'
+audio_path = 'train/'
+sample_path = 'train/029_1_1.wav'
 
 
 # 绘制样本音频波形图，声谱图，梅尔声谱图,梅尔系数图
