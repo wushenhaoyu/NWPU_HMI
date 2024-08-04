@@ -9,8 +9,8 @@ import librosa.display
 import matplotlib.pyplot as plt
 
 
-audio_path = '无人机指令/'
-sample_path = '无人机指令/029_1_1.wav'
+audio_path = 'train/'
+sample_path = 'train/029_1_1.wav'
 
 
 # 绘制样本音频波形图，声谱图，梅尔声谱图,梅尔系数图
@@ -75,8 +75,6 @@ def draw_figures():
 
 
 students_num = ["029", "033", "039", "045", "049", "068", "914", "918", "919", "934", "970"]
-#orders_num = ["Takeoff", "Landing", "Advance", "Retreat", "Rise"]
-#orders_num = ["起飞-1", "降落-2", "前进-3", "后退-4", "升高-5"]
 orders_num = ["Takeoff-1", "Landing-2", "Advance-3", "Retreat-4", "Rise-5"]
 repeat_num = ['1', '2', '3', '4']
 number_of_mfcc_features = 13
@@ -91,7 +89,6 @@ def mfcc_extraction(path, students_num, orders_num, repeat_num):
     for stu_num in students_num:
         for index, order in enumerate(orders_num):
             for repeat in repeat_num:
-                #file_path = path + stu_num + '_' + str(index+1) + '_' + repeat + ".wav"
                 file_path = path + stu_num + '_' + order[-1] + '_' + repeat + ".wav"
                 if os.path.exists(file_path):
                     x, sr = librosa.load(file_path)
