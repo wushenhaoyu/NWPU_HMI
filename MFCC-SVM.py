@@ -1,9 +1,7 @@
 
 import os
-import sys
 import numpy
 import librosa
-import pandas as pd
 import numpy as np
 import librosa.display
 import matplotlib.pyplot as plt
@@ -79,6 +77,23 @@ orders_num = ["Takeoff-1", "Landing-2", "Advance-3", "Retreat-4", "Rise-5"]
 repeat_num = ['1', '2', '3', '4']
 number_of_mfcc_features = 13
 
+def add_noise(data, noise_factor = 0.015):
+    noise = noise_factor * np.random.randn(len(data))
+    data = data + noise
+    return data
+#延时
+def time_stretch(data, rate = 0.8):   #0.8倍速慢放
+    return librosa.effects.time_stretch(data, rate=rate)
+#时移
+def time_shift(data, sr, shift_time = 0.2):      #shift_time最大时移长度,单位 秒
+    shift = np.random.randint(-shift_time * sr,shift_time * sr)
+    #shift为负值，代表左移，为正值代表右移
+    return np.roll(data,shift)
+#增高音调
+def pitch(data, sr, pitch_factor = 0.5):
+    n_steps = pitch_factor * 12     #将音高偏移量pitch_factor转换为半音步数n_steps
+    #12是参数bins_per_octave的默认值，表示每个八度12个半音
+    return librosa.effects.pitch_shift(data,sr=sr,n_steps=n_steps)
 
 # 提取MFCC特征
 def mfcc_extraction(path, students_num, orders_num, repeat_num):
@@ -93,12 +108,34 @@ def mfcc_extraction(path, students_num, orders_num, repeat_num):
                 if os.path.exists(file_path):
                     x, sr = librosa.load(file_path)
                     x = librosa.effects.preemphasis(x)  # 预加重处理
+                    x1 = add_noise(x)
+                    x2 = time_stretch(x)
+                    x3 = time_shift(x, sr)
+                    x4 = pitch(x, sr)
                     mean_mfccs = np.mean(librosa.feature.mfcc(y=x, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
                     std_mfccs = np.std(librosa.feature.mfcc(y=x, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
-
                     mean_features.append(mean_mfccs)
                     std_features.append(std_mfccs)
-
+                    labels.append(order[:-2])
+                    mean_mfccs = np.mean(librosa.feature.mfcc(y=x1, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    std_mfccs = np.std(librosa.feature.mfcc(y=x1, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    mean_features.append(mean_mfccs)
+                    std_features.append(std_mfccs)
+                    labels.append(order[:-2])
+                    mean_mfccs = np.mean(librosa.feature.mfcc(y=x2, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    std_mfccs = np.std(librosa.feature.mfcc(y=x2, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    mean_features.append(mean_mfccs)
+                    std_features.append(std_mfccs)
+                    labels.append(order[:-2])
+                    mean_mfccs = np.mean(librosa.feature.mfcc(y=x3, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    std_mfccs = np.std(librosa.feature.mfcc(y=x3, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    mean_features.append(mean_mfccs)
+                    std_features.append(std_mfccs)
+                    labels.append(order[:-2])
+                    mean_mfccs = np.mean(librosa.feature.mfcc(y=x4, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    std_mfccs = np.std(librosa.feature.mfcc(y=x4, sr=sr, n_mfcc=number_of_mfcc_features).T, axis=0)
+                    mean_features.append(mean_mfccs)
+                    std_features.append(std_mfccs)
                     labels.append(order[:-2])
                 else:
                     pass
