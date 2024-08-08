@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import wave
+import time
 import librosa
 import numpy as np
 import pvrecorder
@@ -83,11 +84,11 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.model = MFCC_CNN()
         model_weights_path = 'best_model_weights.pth'
-        self.model.load_state_dict(torch.load(model_weights_path))
+        self.model.load_state_dict(torch.load(model_weights_path, weights_only=True))
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
-        self.model.load_state_dict(torch.load(model_weights_path, map_location=self.device))
+        self.model.load_state_dict(torch.load(model_weights_path, map_location=self.device, weights_only=True))
         self.model.eval()
 
 
@@ -107,7 +108,7 @@ class Ui_MainWindow(object):
         # 加载音频文件并提取 MFCC
         data, sr = librosa.load('output.wav', sr=None)
         data = librosa.effects.preemphasis(data)
-        mfcc = librosa.feature.mfcc(y=data, sr=sr, n_mfcc=13)
+        mfcc = librosa.feature.mfcc(y=data, sr=sr, n_mfcc=13).T
 
         # 清除之前的图像
         self.figure.clear()
@@ -127,7 +128,7 @@ class Ui_MainWindow(object):
         self.label_2.setPixmap(pixmap)
 
         # 预处理 MFCC 数据
-        mfcc = zero_pad(mfcc.T)
+        mfcc = zero_pad(mfcc)
         mfcc = torch.tensor(mfcc).unsqueeze(0).to(self.device)
 
         # 使用模型进行预测
@@ -139,7 +140,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.toolButton.setText(_translate("MainWindow", "开始录音"))
         self.label.setText(_translate("MainWindow", "预测结果："))
-        self.progressBar.setFormat(_translate("MainWindow", "%pms"))
+        self.progressBar.setFormat(_translate("MainWindow", "%p%"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
         self.action.setText(_translate("MainWindow", "导入"))
 
@@ -153,7 +154,7 @@ class MFCC_CNN(nn.Module):
         self.relu2 = nn.ReLU()
         self.pool2 = nn.MaxPool2d(kernel_size=2)
         self.dropout = nn.Dropout(0.5)
-        self.fc1 = nn.Linear(64 * 27 * 3, 2048)
+        self.fc1 = nn.Linear(64 * 54 * 3, 2048)
         self.fc2 = nn.Linear(2048, 5)
         self.softmax = nn.Softmax(dim=1)
 
@@ -168,7 +169,7 @@ class MFCC_CNN(nn.Module):
         return x
 
 
-def zero_pad(feature, max_length=108):
+def zero_pad(feature, max_length=216):
     # 计算需要填充的长度
     difference = max_length - feature.shape[0]
 
@@ -199,16 +200,21 @@ class RecordingThread(QThread):
 
 
         self.recording = True
-        total_frames = 44100 // 1024  # 录音 1 秒
-        frame_duration_ms = 1024 / 44100 * 1000 + 3 # 每帧持续时间 (毫秒)
+        duration_seconds = 2        # 录音 2 秒
+        start_time = time.time()
+        total_frames = int(44100 * duration_seconds / 1024)
+        frame_duration_ms = 1024 / 44100 * 1000  # 每帧持续时间 (毫秒),约为23ms
+        max_prograss = 1000     #进度条最大时间
         for i in range(total_frames):
             if not self.recording:
                 break
             data = self.stream.read(1024)
             self.frames.append(data)
-            progress = int(i * frame_duration_ms)
+            elapsed_time = time.time() - start_time
+            progress = int((elapsed_time / duration_seconds) * max_prograss)
+            progress = min(progress, max_prograss)
             self.progress_updated.emit(progress)
-            self.msleep(10)  # 模拟每 10 ms 更新一次进度条
+            #self.msleep(int(frame_duration_ms))  # 模拟每 23 ms 更新一次进度条
 
         if self.recording:
             # 停止录音

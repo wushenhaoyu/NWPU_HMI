@@ -12,7 +12,7 @@ sample_path = 'train/029_1_1.wav'
 
 
 # 绘制样本音频波形图，声谱图，梅尔声谱图,梅尔系数图
-data, sr = librosa.load(sample_path)     #   sr->sample rating,采样率
+data, sr = librosa.load(sample_path,sr=None)     #   sr->sample rating,采样率
 data = librosa.effects.preemphasis(data)       #预加重处理
 
 
@@ -41,7 +41,7 @@ def mel_spectrogram(data,sr):
 
 # 可视化MFCC特征
 def mfcc_visualization(sample_path):
-    y, sr = librosa.load(sample_path)
+    y, sr = librosa.load(sample_path,sr=None)
     y = librosa.effects.preemphasis(y)  # 预加重处理
     mfcc_features = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13, hop_length=512).T
     '''
@@ -106,7 +106,7 @@ def mfcc_extraction(path, students_num, orders_num, repeat_num):
             for repeat in repeat_num:
                 file_path = path + stu_num + '_' + order[-1] + '_' + repeat + ".wav"
                 if os.path.exists(file_path):
-                    x, sr = librosa.load(file_path)
+                    x, sr = librosa.load(file_path,sr=None)
                     x = librosa.effects.preemphasis(x)  # 预加重处理
                     x1 = add_noise(x)
                     x2 = time_stretch(x)
@@ -182,7 +182,7 @@ dictionary = {}
 for i in mfcc_labels:
     dictionary[i] = dictionary.get(i,0) + 1
 print(dictionary)
-#>>>{'Takeoff': 23, 'Landing': 23, 'Advance': 24, 'Retreat': 22, 'Rise': 20}
+#>>>{'Takeoff': 115, 'Landing': 115, 'Advance': 120, 'Retreat': 110, 'Rise': 100}
 '''
 ros = RandomOverSampler(random_state=42)
 new_mfcc_features,  mfcc_labels = ros.fit_resample(mfcc_features,  mfcc_labels)
@@ -191,7 +191,7 @@ dictionary_2 = {}
 for i in mfcc_labels:
     dictionary_2[i] = dictionary_2.get(i,0) + 1
 print(dictionary_2)
-#>>>{'Takeoff': 24, 'Landing': 24, 'Advance': 24, 'Retreat': 24, 'Rise': 24}
+#>>>{'Takeoff': 120, 'Landing': 120, 'Advance': 120, 'Retreat': 120, 'Rise': 120}
 '''
 
 
